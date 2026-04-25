@@ -6,13 +6,7 @@ const config = {
   width: 800,
   height: 600,
   backgroundColor: "#1a1a2e",
-  scene: [GameScene],// first scene in the list starts
-  physics: {
-    default: "arcade",
-    arcade: {
-      debug: false
-    }
-  }
+  scene: [GameScene]// first scene in the list starts
 };
 
 const game = new Phaser.Game(config);
