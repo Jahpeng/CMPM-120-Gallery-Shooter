@@ -33,6 +33,7 @@ class GameScene extends Phaser.Scene {
     this.player_projectiles = [];
     this.enemy_projectiles = [];
     this.enemy_shield = [];
+    this.enemies = [];
 
     // BULLET LOGIC
     this.last_shot_time = 0;
@@ -50,21 +51,24 @@ class GameScene extends Phaser.Scene {
     this.points = [
             20, 50,
             780, 50,
+            400, 200,
+            20, 50,
         ];
     this.curve = new Phaser.Curves.Spline(this.points);
-    my.sprite.enemyShip = this.add.follower(this.curve, 20, 50, "enemy_shooter");
-    my.sprite.enemyShip.setScale(0.2);
-    my.sprite.enemyShip.startFollow({
-        from: 0,
-        to: 1,
-        delay: 0,
-        duration: 5000,
-        ease: 'Linear', //'Sine.easeInOut',
-        repeat: -1,
-        yoyo: true,
-        rotateToPath: false,
-        rotationOffset: -90
-    });
+    this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
+    // my.sprite.enemyShip = this.add.follower(this.curve, 20, 50, "enemy_shooter");
+    // my.sprite.enemyShip.setScale(0.2);
+    // my.sprite.enemyShip.startFollow({
+    //     from: 0,
+    //     to: 1,
+    //     delay: 0,
+    //     duration: 5000,
+    //     ease: 'Linear', //'Sine.easeInOut',
+    //     repeat: -1,
+    //     yoyo: true,
+    //     rotateToPath: false,
+    //     rotationOffset: -90
+    // });
 
   }
 
@@ -107,6 +111,9 @@ class GameScene extends Phaser.Scene {
     }
 
     // ENEMY LOGIC
+    // this.enemies.forEach(enemy => {
+    //     enemy.update(delta);
+    // });
 
 
   }
