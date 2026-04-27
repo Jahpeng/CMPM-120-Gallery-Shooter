@@ -4,7 +4,7 @@ const config = {
     pixelArt: true  // prevent pixel art from getting blurred when scaled
   },
   width: 800,
-  height: 600,
+  height: 740, // 600 + 140
   backgroundColor: "#1a1a2e",
   scene: [GameScene]// first scene in the list starts
 };
