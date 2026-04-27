@@ -9,6 +9,8 @@ class RangedEnemy{
         // this.t = start_At;
         // this.speed = 0.002;
         // this.setScale(0.2);
+        this.lastShot = 0;
+        this.fireRate = 2000;
 
         this.sprite = scene.add.follower(path, x, y, texture)
 
@@ -18,23 +20,25 @@ class RangedEnemy{
             from: 0,
             to: 1,
             delay: 0,
-            duration: 5000,
+            duration: 6000,
             ease: 'Linear', //'Sine.easeInOut',
             repeat: -1,
-            yoyo: true,
+            yoyo: false,
             rotateToPath: false,
             rotationOffset: -90,
             startAt: start_At
         });
     }
-    // update(delta) {
-    //     this.t += this.speed;
+    
+    shoot(scene){
+        let bullet = scene.add.sprite(
+            this.sprite.x,
+            this.sprite.y + 20,
+            "enemy_missile"
+        );
 
-    //     if (this.t > 1) this.t = 0;
-
-    //     const point = this.path.getPoint(this.t);
-
-    //     this.x = point.x;
-    //     this.y = point.y;
-    // }
+        bullet.setScale(0.4);
+        bullet.setAngle(180)
+        scene.enemy_projectiles.push(bullet);
+    }
 }
