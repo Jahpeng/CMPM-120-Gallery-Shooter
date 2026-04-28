@@ -14,7 +14,8 @@ class ChargeEnemy{
         
         // NOTE TO SELF: REMEMBER TO DESTORY SHIELD IF CHARGER DIES
         this.sprite.setScale(0.3);
-        this.sprite_shield.setScale(0.5)
+        // this.sprite_shield.setScale(0.5)
+        this.sprite_shield.setScale(0.8, 0.5)
 
         this.sprite.startFollow({
             from: 0,
