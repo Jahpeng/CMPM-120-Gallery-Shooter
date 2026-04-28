@@ -4,6 +4,9 @@ class GameScene extends Phaser.Scene {
     super("GameScene"); // scene key
     // init plain properties here
     this.my = {sprite: {}};
+    this.lives = 3;
+    this.score = 0;
+    this.wave = 1;
   }
 
   preload() {
@@ -69,9 +72,9 @@ class GameScene extends Phaser.Scene {
             20, 50,
           ];
     this.curve = new Phaser.Curves.Spline(this.points1);
-    this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
-    this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.3));
-    this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.5));
+    // this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
+    // this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.3));
+    // this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.5));
     
     // ENEMY TYPE 2 (CHARGER) PATH
     this.points2 = [
@@ -90,7 +93,21 @@ class GameScene extends Phaser.Scene {
             400, 100, // back to start
           ];
     this.curve2 = new Phaser.Curves.Spline(this.points2);
-    this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0));
+    // this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0));
+
+    //STARTING WAVE
+    this.startWave();
+
+    // GAME UI
+    this.lives_icon = this.add.sprite(160, 650, "player");
+    this.lives_icon.setScale(0.08);
+
+    this.lives_text = this.add.text(180, 650, "x3", {fontSize: "28px", fill: "#ffa500"});
+    this.updateLivesUI();
+
+    this.score_text = this.add.text (300, 650, "SCORE: 0", {fontSize: "28px", fill: "#ffa500"});
+
+    this.wave_text = this.add.text (500, 650, "WAVE 1", {fontSize: "28px", fill: "#ffa500"});
   }
 
   update(time, delta) {
@@ -123,7 +140,7 @@ class GameScene extends Phaser.Scene {
 
     for (let i = 0; i < this.player_projectiles.length; i++) {
         let bullet = this.player_projectiles[i];
-        bullet.y -= 120 * (delta / 1000);
+        bullet.y -= 160 * (delta / 1000);
         if (bullet.y < -50) {
             bullet.destroy();
             this.player_projectiles.splice(i, 1);
@@ -175,6 +192,14 @@ class GameScene extends Phaser.Scene {
             enemy.sprite_shield.destroy();
             enemy.sprite_shield = null;
           }
+          if (enemy instanceof ChargeEnemy){
+            this.score += 50;
+            this.updateScoreUI();
+          }
+          else{
+            this.score += 25;
+            this.updateScoreUI();
+          }
           enemy.sprite.destroy();
           bullet.destroy();
 
@@ -199,6 +224,9 @@ class GameScene extends Phaser.Scene {
           if(time > this.last_hit_time + this.hit_cooldown){
             console.log("CHARGER HIT!");
             this.last_hit_time = time;
+
+            this.lives--;
+            this.updateLivesUI();
           }
         }
       }
@@ -213,8 +241,31 @@ class GameScene extends Phaser.Scene {
         enemy_bullet.destroy();
         this.enemy_projectiles.splice(i, 1);
         i--;
+
+        this.lives--;
+        this.updateLivesUI();
       }
 
+    }
+
+    // CHECK THE WAVE STATUS
+    if (this.enemies.length === 0){
+      //clear all prjectiles before moving to next screen
+      for (let bullet of this.player_projectiles){
+        bullet.destroy();
+      }
+      this.player_projectiles = [];
+
+      for (let bullet2 of this.enemy_projectiles){
+        bullet2.destroy();
+      }
+      this.enemy_projectiles = [];
+
+      if (this.wave < 10){
+        this.wave++;
+      }
+      this.updateWaveUI();
+      this.startWave();
     }
 
 
@@ -227,5 +278,40 @@ class GameScene extends Phaser.Scene {
     return true;
 
     }
+
+  updateLivesUI(){
+    this.lives_text.setText("x" + this.lives);
+  }
+
+  updateScoreUI(){
+    this.score_text.setText("SCORE: " + this.score);
+  }
+
+  updateWaveUI(){
+    this.wave_text.setText("WAVE " + this.wave);
+  }
+
+  startWave(){
+    if (this.wave === 1){ // two shooters
+      this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
+      this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.5));
+      this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0)); //TESTING
+    }
+    else if (this.wave === 2){ // two shooters, one charger
+      this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
+      this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.5));
+      this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0));
+    }
+    else if (this.wave === 3) { // three shooter, two chargers
+      this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
+      this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.3));
+      this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.5));
+      this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0));
+      this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0.5));
+    }
+    else {
+      // end scene or boss scene
+    }
+  }
 
 }
