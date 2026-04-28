@@ -48,6 +48,10 @@ class GameScene extends Phaser.Scene {
     // BULLET LOGIC
     this.last_shot_time = 0;
     this.cooldown = 1500;
+
+    // PLAYER HIT LOGIC
+    this.last_hit_time = 0;
+    this.hit_cooldown = 1000;
     
     // PLAYER SETUP 
     my.sprite.player = this.add.sprite(50, 550, "player");
@@ -150,6 +154,78 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    // COLLISION DETECTION (PLAYER TO ENEMY)
+    for (let i = 0; i < this.enemies.length; i++){
+      let enemy = this.enemies[i];
+
+      for (let j = 0; j < this.player_projectiles.length; j++){
+        let bullet = this.player_projectiles[j];
+
+        if(enemy.sprite_shield && this.collides(enemy.sprite_shield, bullet)){
+          bullet.destroy();
+          enemy.sprite_shield.destroy();
+
+          enemy.sprite_shield = null;
+          this.player_projectiles.splice(j, 1);
+          j--;
+        }
+
+        if(this.collides(enemy.sprite, bullet)){
+          if (enemy instanceof ChargeEnemy && enemy.sprite_shield){
+            enemy.sprite_shield.destroy();
+            enemy.sprite_shield = null;
+          }
+          enemy.sprite.destroy();
+          bullet.destroy();
+
+          this.enemies.splice(i, 1);
+          this.player_projectiles.splice(j, 1);
+
+          i--;
+          j--;
+          break;
+        }
+      }
+    }
+
+    // COLLISION DETECTION (ENEMY TO PLAYER)
+    //
+    // CHARGER
+    for (let i = 0; i < this.enemies.length; i++){
+      let enemy = this.enemies[i];
+
+      if (enemy instanceof ChargeEnemy){
+        if(this.collides(enemy.sprite, my.sprite.player)){
+          if(time > this.last_hit_time + this.hit_cooldown){
+            console.log("CHARGER HIT!");
+            this.last_hit_time = time;
+          }
+        }
+      }
+    }
+
+    // SHOOTER
+    for (let i = 0; i < this.enemy_projectiles.length; i++){
+      let enemy_bullet = this.enemy_projectiles[i];
+
+      if (this.collides(enemy_bullet, my.sprite.player)){
+        console.log("SHOOTER HIT!");
+        enemy_bullet.destroy();
+        this.enemy_projectiles.splice(i, 1);
+        i--;
+      }
+
+    }
+
 
   }
+
+  // A center-radius AABB collision check
+  collides(a, b) {
+    if (Math.abs(a.x - b.x) > (a.displayWidth/2 + b.displayWidth/2)) return false;
+    if (Math.abs(a.y - b.y) > (a.displayHeight/2 + b.displayHeight/2)) return false;
+    return true;
+
+    }
+
 }
