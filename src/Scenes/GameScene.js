@@ -17,6 +17,8 @@ class GameScene extends Phaser.Scene {
     // PLAYER STUFF
     this.load.image("player", "spaceRockets_003.png");
     this.load.image("player_missile", "spaceMissiles_010.png");
+
+    this.load.audio("player_fire", "laser1.ogg");
     
     // ENEMY TYPE 1 (SHOOTER) STUFF
     this.load.image("enemy_shooter", "spaceShips_004.png");
@@ -25,6 +27,9 @@ class GameScene extends Phaser.Scene {
     // ENEMY TYPE 2 (CHARGER) STUFF
     this.load.image("enemy_charger", "spaceShips_003.png");
     this.load.image("enemy_shield", "spaceParts_088.png")
+
+    this.load.audio("enemy_dead", "spaceTrash1.ogg");
+
   }
 
   create() {
@@ -47,6 +52,10 @@ class GameScene extends Phaser.Scene {
     this.player_projectiles = [];
     this.enemy_projectiles = [];
     this.enemies = [];
+
+    // GAME AUDIO
+    this.player_shoot = this.sound.add("player_fire", {loop: false, volume: 0.5})
+    this.enemy_dead = this.sound.add("enemy_dead", {loop: false, volume: 0.5})
 
     // BULLET LOGIC
     this.last_shot_time = 0;
@@ -136,6 +145,7 @@ class GameScene extends Phaser.Scene {
         //bullet.angle = -90;
         this.player_projectiles.push(bullet);
         this.last_shot_time = time;
+        this.player_shoot.play();
     }
 
     for (let i = 0; i < this.player_projectiles.length; i++) {
@@ -185,6 +195,7 @@ class GameScene extends Phaser.Scene {
           enemy.sprite_shield = null;
           this.player_projectiles.splice(j, 1);
           j--;
+          continue;
         }
 
         if(this.collides(enemy.sprite, bullet)){
@@ -208,6 +219,7 @@ class GameScene extends Phaser.Scene {
 
           i--;
           j--;
+          this.enemy_dead.play();
           break;
         }
       }
