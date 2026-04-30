@@ -8,6 +8,20 @@ class GameScene extends Phaser.Scene {
     this.score = 0;
     this.wave = 1;
   }
+  init() {
+    this.my = { sprite: {} };
+    this.lives = 3;
+    this.score = 0;
+    this.wave = 1;
+    this.player_alive = true;
+
+    this.player_projectiles = [];
+    this.enemy_projectiles = [];
+    this.enemies = [];
+
+    this.last_shot_time = 0;
+    this.last_hit_time = 0;
+  }
 
   preload() {
     // load assets BEFORE create
@@ -19,6 +33,13 @@ class GameScene extends Phaser.Scene {
     this.load.image("player_missile", "spaceMissiles_010.png");
 
     this.load.audio("player_fire", "laser1.ogg");
+    this.load.audio("player_death", "explosionCrunch_002.ogg");
+    this.load.audio("player_hit", "lowDown.ogg");
+
+    this.load.image("explosion00", "explosion00.png");
+    this.load.image("explosion01", "explosion01.png");
+    this.load.image("explosion02", "explosion02.png");
+    this.load.image("explosion03", "explosion03.png");
     
     // ENEMY TYPE 1 (SHOOTER) STUFF
     this.load.image("enemy_shooter", "spaceShips_004.png");
@@ -29,6 +50,11 @@ class GameScene extends Phaser.Scene {
     this.load.image("enemy_shield", "spaceParts_088.png")
 
     this.load.audio("enemy_dead", "spaceTrash1.ogg");
+
+    this.load.image("fart00", "fart00.png");
+    this.load.image("fart01", "fart01.png");
+    this.load.image("fart02", "fart02.png");
+    this.load.image("fart03", "fart03.png");
 
   }
 
@@ -54,8 +80,10 @@ class GameScene extends Phaser.Scene {
     this.enemies = [];
 
     // GAME AUDIO
-    this.player_shoot = this.sound.add("player_fire", {loop: false, volume: 0.5})
-    this.enemy_dead = this.sound.add("enemy_dead", {loop: false, volume: 0.5})
+    this.player_shoot = this.sound.add("player_fire", {loop: false, volume: 0.5});
+    this.enemy_dead = this.sound.add("enemy_dead", {loop: false, volume: 0.5});
+    this.player_dead = this.sound.add("player_death", {loop: false, volume: 0.5});
+    this.player_hit = this.sound.add("player_hit", {loop: false, volume: 1});
 
     // BULLET LOGIC
     this.last_shot_time = 0;
@@ -64,6 +92,7 @@ class GameScene extends Phaser.Scene {
     // PLAYER HIT LOGIC
     this.last_hit_time = 0;
     this.hit_cooldown = 1000;
+    this.player_alive = true;
     
     // PLAYER SETUP 
     my.sprite.player = this.add.sprite(50, 550, "player");
@@ -117,6 +146,36 @@ class GameScene extends Phaser.Scene {
     this.score_text = this.add.text (300, 650, "SCORE: 0", {fontSize: "28px", fill: "#ffa500"});
 
     this.wave_text = this.add.text (500, 650, "WAVE 1", {fontSize: "28px", fill: "#ffa500"});
+
+    if (!this.anims.exists("boom")) {
+      this.anims.create({
+        key: "boom",
+        frames: [
+          { key: "explosion00" },
+          { key: "explosion01" },
+          { key: "explosion02" },
+          { key: "explosion03" },
+        ],
+        frameRate: 20,
+        repeat: 5,
+        hideOnComplete: true
+      });
+    }
+
+    if (!this.anims.exists("fart")) {
+      this.anims.create({
+        key: "fart",
+        frames: [
+          { key: "fart00" },
+          { key: "fart01" },
+          { key: "fart02" },
+          { key: "fart03" },
+        ],
+        frameRate: 20,
+        repeat: 3,
+        hideOnComplete: true
+      });
+    }
   }
 
   update(time, delta) {
@@ -125,17 +184,17 @@ class GameScene extends Phaser.Scene {
     let my = this.my;
 
     // PLAYER CONTROLS
-    if (this.akey.isDown){
+    if (this.akey.isDown && this.player_alive){
         //my.sprite.mouth.x += 20;
         my.sprite.player.x -= 160 * (delta/1000)
         if (my.sprite.player.x <= 20) my.sprite.player.x = 20; // was 0
     }
-    if (this.dkey.isDown){
+    if (this.dkey.isDown && this.player_alive){
         my.sprite.player.x += 160 * (delta/1000)
         if (my.sprite.player.x >= 780) my.sprite.player.x = 780; // was 800
     }
 
-    if (this.spaceKey.isDown && (time > this.last_shot_time + this.cooldown)){
+    if (this.spaceKey.isDown && (time > this.last_shot_time + this.cooldown) && this.player_alive){
         let bullet = this.add.sprite(
             my.sprite.player.x,
             my.sprite.player.y - 50,
@@ -211,6 +270,7 @@ class GameScene extends Phaser.Scene {
             this.score += 25;
             this.updateScoreUI();
           }
+          this.fart = this.add.sprite(enemy.sprite.x, enemy.sprite.y, "fart00").setScale(0.25).play("fart");
           enemy.sprite.destroy();
           bullet.destroy();
 
@@ -233,13 +293,15 @@ class GameScene extends Phaser.Scene {
 
       if (enemy instanceof ChargeEnemy){
         if(this.collides(enemy.sprite, my.sprite.player)){
-          if(time > this.last_hit_time + this.hit_cooldown){
-            console.log("CHARGER HIT!");
-            this.last_hit_time = time;
+          // if(time > this.last_hit_time + this.hit_cooldown){
+          //   console.log("CHARGER HIT!");
+          //   this.last_hit_time = time;
 
-            this.lives--;
-            this.updateLivesUI();
-          }
+          //   this.lives--;
+          //   this.updateLivesUI();
+          // }
+          //console.log("CHARGER HIT!");
+          this.playerHit(time);
         }
       }
     }
@@ -249,14 +311,27 @@ class GameScene extends Phaser.Scene {
       let enemy_bullet = this.enemy_projectiles[i];
 
       if (this.collides(enemy_bullet, my.sprite.player)){
-        console.log("SHOOTER HIT!");
+        //console.log("SHOOTER HIT!");
         enemy_bullet.destroy();
         this.enemy_projectiles.splice(i, 1);
         i--;
 
-        this.lives--;
-        this.updateLivesUI();
+        // this.lives--;
+        // this.updateLivesUI();
+        this.playerHit(time);
       }
+
+    }
+    
+    // CHECK PLAYER HEALTH
+    if (this.lives <= 0 && this.player_alive){
+      this.player_dead.play();
+      this.player_alive = false;
+      this.my.sprite.player.setVisible(false);
+      this.boom = this.add.sprite(this.my.sprite.player.x, this.my.sprite.player.y, "explosion00").setScale(0.25).play("boom");
+      this.boom.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+        this.scene.start("loseScene", { score: this.score })
+      }); // may need to change on to once if this causes major issues
 
     }
 
@@ -307,7 +382,7 @@ class GameScene extends Phaser.Scene {
     if (this.wave === 1){ // two shooters
       this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
       this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0.5));
-      this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0)); //TESTING
+      // this.enemies.push(new ChargeEnemy(this, this.curve2, "enemy_charger", (config.width /2), 100, 0)); //TESTING
     }
     else if (this.wave === 2){ // two shooters, one charger
       this.enemies.push(new RangedEnemy(this, this.curve, "enemy_shooter", 20, 50, 0));
@@ -324,6 +399,37 @@ class GameScene extends Phaser.Scene {
     else {
       // end scene or boss scene
     }
+  }
+
+  playerHit(time){
+    if (time <= this.last_hit_time + this.hit_cooldown){
+      return;
+    }
+    this.player_hit.play();
+    this.last_hit_time = time;
+    this.lives--;
+    this.updateLivesUI();
+    this.startFlash();
+  }
+
+  startFlash(){
+    let player = this.my.sprite.player;
+
+    if(this.flashTween) {
+      this.flashTween.stop();
+      player.setAlpha(1);
+    }
+
+    this.flashTween = this.tweens.add({
+      targets: player,
+      alpha: 0.2,
+      duration: 100,
+      yoyo: true,
+      repeat: 9,
+      onComplete: () => {
+        player.setAlpha(1);
+      }
+    });
   }
 
 }
