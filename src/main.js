@@ -6,7 +6,7 @@ const config = {
   width: 800,
   height: 740, // 600 + 140
   backgroundColor: "#1a1a2e",
-  scene: [LoseScene,GameScene,]// first scene in the list starts
+  scene: [GameScene,LoseScene,]// first scene in the list starts
 };
 
 const game = new Phaser.Game(config);
