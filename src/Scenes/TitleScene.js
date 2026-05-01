@@ -3,9 +3,21 @@ class TitleScene extends Phaser.Scene {
         super("titleScene");
     }
 
-    init(){}
+    init(){
+        this.enemy_projectiles = [];
+    }
 
-    preload(){}
+    preload(){
+        this.load.setPath("./assets/");
+    
+        // PLAYER STUFF
+        this.load.image("player", "spaceRockets_003.png");
+        this.load.image("player_missile", "spaceMissiles_010.png");
+    
+        // ENEMY TYPE 1 (SHOOTER) STUFF
+        this.load.image("enemy_shooter", "spaceShips_004.png");
+        this.load.image("enemy_missile", "spaceMissiles_005.png");
+    }
 
     create(){
         this.add.text(400, 180, "SPACE BRAWL", {
@@ -81,8 +93,50 @@ class TitleScene extends Phaser.Scene {
             this.scene.start("creditsScene");
         });
 
+        this.enemyPath = [
+            50, 50,
+            750, 50,
+            50, 50,
+        ]
+        this.enemyCurve = new Phaser.Curves.Spline(this.enemyPath);
+
+        this.playerPath = [
+            50, 700,
+            750, 700,
+            50, 700,
+        ]
+        this.playerCurve = new Phaser.Curves.Spline(this.playerPath);
+
+        this.enemy = new RangedEnemy(this, this.enemyCurve, "enemy_shooter", 50, 50, 0);
+        this.player = new RangedEnemy(this, this.playerCurve, "player", 50, 700, 0.5);
+        // this.player.setScale(0.1);
+
+
     }
 
-    update(){}
+    update(time, delta){
+        if(time > this.enemy.lastShot + this.enemy.fireRate){
+          this.enemy.shoot(this);
+          this.player.shoot(this);
+          this.enemy.lastShot = time;
+          this.player.lastShot = time;
+        }
 
+        this.dealWithBullets(delta);
+    }
+
+
+    dealWithBullets(delta) {
+        for (let i = 0; i < this.enemy_projectiles.length; i++) {
+            let bullet = this.enemy_projectiles[i];
+
+            bullet.y += 120 * (delta / 1000);
+
+            if (bullet.y > 600) {
+                bullet.destroy();
+                this.enemy_projectiles.splice(i, 1);
+                i--;
+            }
+        }
+    }
 }

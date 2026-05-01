@@ -9,7 +9,7 @@ class GameScene extends Phaser.Scene {
     this.wave = 1;
   }
   init() {
-    this.my = { sprite: {} };
+    this.my = {sprite: {}};
     this.lives = 3;
     this.score = 0;
     this.wave = 1;
@@ -148,10 +148,11 @@ class GameScene extends Phaser.Scene {
     this.lives_text = this.add.text(180, 650, "x3", {fontSize: "28px", fill: "#ffa500"});
     this.updateLivesUI();
 
-    this.score_text = this.add.text (300, 650, "SCORE: 0", {fontSize: "28px", fill: "#ffa500"});
+    this.score_text = this.add.text(300, 650, "SCORE: 0", {fontSize: "28px", fill: "#ffa500"});
 
-    this.wave_text = this.add.text (500, 650, "WAVE 1", {fontSize: "28px", fill: "#ffa500"});
+    this.wave_text = this.add.text(500, 650, "WAVE 1", {fontSize: "28px", fill: "#ffa500"});
 
+    // STRUCTURE COPIED FROM PROFESSOR'S LECTURE
     if (!this.anims.exists("boom")) {
       this.anims.create({
         key: "boom",
@@ -217,12 +218,13 @@ class GameScene extends Phaser.Scene {
         bullet.y -= 160 * (delta / 1000);
         if (bullet.y < -50) {
             bullet.destroy();
-            this.player_projectiles.splice(i, 1);
+            this.player_projectiles.splice(i, 1); //SPLICING STUFF FROM CHATGPT
             i--;
         }
     }
 
     // ENEMY LOGIC
+    // NOTE: INSTANCEOF STUFF CAME FROM CHATGPT
     
     for (let enemy of this.enemies){
       if (enemy instanceof RangedEnemy){
@@ -246,6 +248,7 @@ class GameScene extends Phaser.Scene {
     }
 
     // COLLISION DETECTION (PLAYER TO ENEMY)
+    
     for (let i = 0; i < this.enemies.length; i++){
       let enemy = this.enemies[i];
 
@@ -364,6 +367,7 @@ class GameScene extends Phaser.Scene {
   }
 
   // A center-radius AABB collision check
+  // NOTE: FROM PROFESSORS' LECTURE
   collides(a, b) {
     if (Math.abs(a.x - b.x) > (a.displayWidth/2 + b.displayWidth/2)) return false;
     if (Math.abs(a.y - b.y) > (a.displayHeight/2 + b.displayHeight/2)) return false;
@@ -418,6 +422,7 @@ class GameScene extends Phaser.Scene {
     this.startFlash();
   }
 
+  // THIS CODE FROM CHATGPT
   startFlash(){
     let player = this.my.sprite.player;
 
