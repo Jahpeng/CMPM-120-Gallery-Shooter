@@ -78,6 +78,11 @@ class GameScene extends Phaser.Scene {
     this.player_projectiles = [];
     this.enemy_projectiles = [];
     this.enemies = [];
+    this.my.sprites = {
+      player_projectiles: this.player_projectiles,
+      enemy_projectiles: this.enemy_projectiles,
+      enemies: this.enemies
+    } //adding to satisfy grouping requirement
 
     // GAME AUDIO
     this.player_shoot = this.sound.add("player_fire", {loop: false, volume: 0.5});
