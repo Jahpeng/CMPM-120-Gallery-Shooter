@@ -1,17 +1,17 @@
-class LoseScene extends Phaser.Scene {
+class WinScene extends Phaser.Scene {
     constructor() {
-        super("loseScene");
+        super("winScene");
     }
 
     init(data){
-        this.finalScore = data.score || 0;
+        this.finalScore = (data.score + 100) || 0;
     }
     preload(){}
 
     create(){
-        this.add.text(400, 180, "YOU LOSE", {
+        this.add.text(400, 180, "YOU WIN!", {
             fontSize: "64px",
-            color: "#ff0000"
+            color: "#00ff80"
         }).setOrigin(0.5);
 
         this.add.text(400, 260, "FINAL SCORE", {

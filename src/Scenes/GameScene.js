@@ -398,6 +398,7 @@ class GameScene extends Phaser.Scene {
     }
     else {
       // end scene or boss scene
+      this.scene.start("winScene", { score: this.score });
     }
   }
 
