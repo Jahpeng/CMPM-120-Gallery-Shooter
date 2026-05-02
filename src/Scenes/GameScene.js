@@ -8,7 +8,7 @@ class GameScene extends Phaser.Scene {
     this.score = 0;
     this.wave = 1;
   }
-  init() {
+  init() { // to allow replay
     this.my = {sprite: {}};
     this.lives = 3;
     this.score = 0;
@@ -65,8 +65,8 @@ class GameScene extends Phaser.Scene {
     // HEIGHT 600
     let my = this.my;
 
-    // GAME UI
-    this.add.rectangle(
+    // GAME UI SECTION
+    this.add.rectangle( //CHATGPT helped with making the rectangle
       400,   // screen middle X point 
       670,   // ui middle point
       800,   // screen width
@@ -92,11 +92,11 @@ class GameScene extends Phaser.Scene {
 
     // BULLET LOGIC
     this.last_shot_time = 0;
-    this.cooldown = 1500;
+    this.cooldown = 1500; //1.5 seconds before being allowed to fire again
 
     // PLAYER HIT LOGIC
     this.last_hit_time = 0;
-    this.hit_cooldown = 1000;
+    this.hit_cooldown = 1000; // 1 second invulnerability
     this.player_alive = true;
     
     // PLAYER SETUP 
@@ -152,7 +152,7 @@ class GameScene extends Phaser.Scene {
 
     this.wave_text = this.add.text(500, 650, "WAVE 1", {fontSize: "28px", fill: "#ffa500"});
 
-    // STRUCTURE COPIED FROM PROFESSOR'S LECTURE
+    // ANIMATION STRUCTURE COPIED FROM PROFESSOR'S LECTURE
     if (!this.anims.exists("boom")) {
       this.anims.create({
         key: "boom",
@@ -218,18 +218,18 @@ class GameScene extends Phaser.Scene {
         bullet.y -= 160 * (delta / 1000);
         if (bullet.y < -50) {
             bullet.destroy();
-            this.player_projectiles.splice(i, 1); //SPLICING STUFF FROM CHATGPT
+            this.player_projectiles.splice(i, 1); //SPLICING SUGGESTED BY CHATGPT
             i--;
         }
     }
 
     // ENEMY LOGIC
-    // NOTE: INSTANCEOF STUFF CAME FROM CHATGPT
+    // NOTE: INSTANCEOF SUGGESTED BY CHATGPT
     
     for (let enemy of this.enemies){
       if (enemy instanceof RangedEnemy){
         if(time > enemy.lastShot + enemy.fireRate){
-          enemy.shoot(this);
+          enemy.shoot(this); //bullets stored in enemy_projectiles
           enemy.lastShot = time;
         }
       }
@@ -345,7 +345,7 @@ class GameScene extends Phaser.Scene {
 
     // CHECK THE WAVE STATUS
     if (this.enemies.length === 0){
-      //clear all prjectiles before moving to next screen
+      //clear all prjectiles before moving to next wave
       for (let bullet of this.player_projectiles){
         bullet.destroy();
       }
@@ -367,7 +367,7 @@ class GameScene extends Phaser.Scene {
   }
 
   // A center-radius AABB collision check
-  // NOTE: FROM PROFESSORS' LECTURE
+  // NOTE: FROM PROFESSOR'S LECTURE
   collides(a, b) {
     if (Math.abs(a.x - b.x) > (a.displayWidth/2 + b.displayWidth/2)) return false;
     if (Math.abs(a.y - b.y) > (a.displayHeight/2 + b.displayHeight/2)) return false;
@@ -422,7 +422,7 @@ class GameScene extends Phaser.Scene {
     this.startFlash();
   }
 
-  // THIS CODE FROM CHATGPT
+  // THIS CODE FROM CHATGPT FOR VISUAL INDICATOR OF HIT
   startFlash(){
     let player = this.my.sprite.player;
 
