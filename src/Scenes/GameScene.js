@@ -215,7 +215,7 @@ class GameScene extends Phaser.Scene {
 
     for (let i = 0; i < this.player_projectiles.length; i++) {
         let bullet = this.player_projectiles[i];
-        bullet.y -= 160 * (delta / 1000);
+        bullet.y -= 190 * (delta / 1000); // 160
         if (bullet.y < -50) {
             bullet.destroy();
             this.player_projectiles.splice(i, 1); //SPLICING SUGGESTED BY CHATGPT
